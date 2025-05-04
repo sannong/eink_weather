@@ -1,0 +1,191 @@
+# Weather
+template:
+  - trigger:
+      - trigger: time_pattern
+        hours: /1
+      - trigger: homeassistant
+        event: start
+    action:
+      - action: weather.get_forecasts
+        data:
+          type: daily
+        target:
+          entity_id: weather.weather_ch
+        response_variable: daily
+    sensor:
+      - unique_id: weather_forecast
+        name: Weather Forecast
+        state: "{{ now().isoformat() }}"
+        attributes:
+          forecast: "{{ daily['weather.weather_ch'].forecast }}"
+  - sensor:
+      - unique_id: e_paper_dagen_op_accu
+        name: E-paper op accu
+        unit_of_measurement: days
+        state: >
+          {% set event = as_timestamp(strptime('22-04-2023 18:00','%d-%m-%Y %H:%M')) %}
+          {% set delta = ((event - now().timestamp()) / 86400) | round (1) %}
+          {{ -delta }}
+        state_class: measurement
+  - trigger:
+      - trigger: time_pattern
+        hours: /1
+      - trigger: homeassistant
+        event: start
+    sensor:
+      - name: e-paper display data
+        unique_id: e_paper_display_data
+        icon: ios:display-2
+        availability: "true"
+        state: "OK"
+        attributes:
+          weather_condition_now: >
+            {% set cond_now = states('weather.kord') %}
+            {% if states('sun.sun') == 'below_horizon' %}
+                {% if cond_now == 'sunny' %} night {% elif cond_now == 'partlycloudy' %} night-partly-cloudy {% else %} {{ cond_now }} {% endif %}
+            {% else %}
+                {{ cond_now }}
+            {% endif %}
+          weather_temperature_now: >
+            {{ state_attr('weather.kord', 'temperature') | round(0) }}
+          weather_humid_now: >
+            {{ state_attr('weather.kord', 'humidity') | round(0) }}
+          weather_wind_speed_now: >
+            {{ state_attr('weather.kord', 'wind_speed') | round(0) }}
+          weather_wind_direction_now: >
+            {% set wind = state_attr('weather.kord', 'wind_bearing') %}
+            {% if wind >= 348.75 or wind <= 11.25 %}
+            N
+            {% elif wind >= 11.25 and wind <= 33.75 %}
+            NNE
+            {% elif wind >= 33.75 and wind <= 56.25 %}
+            NE
+            {% elif wind >= 56.25 and wind <= 78.75 %}
+            ENE
+            {% elif wind >= 78.75 and wind <= 101.25 %}
+            E
+            {% elif wind >= 101.25 and wind <= 123.75 %}
+            ESE
+            {% elif wind >= 123.75 and wind <= 146.25 %}
+            SE
+            {% elif wind >= 146.25 and wind <= 168.75 %}
+            SSE
+            {% elif wind >= 168.75 and wind <= 191.25 %}
+            S
+            {% elif wind >= 191.25 and wind <= 213.75 %}
+            SSW
+            {% elif wind >= 213.75 and wind <= 236.25 %}
+            SW
+            {% elif wind >= 236.25 and wind <= 258.75 %}
+            WSW
+            {% elif wind >= 258.75 and wind <= 281.25 %}
+            W
+            {% elif wind >= 281.25 and wind <= 303.75 %}
+            WNW
+            {% elif wind >= 303.75 and wind <= 326.25 %}
+            NW
+            {% elif wind >= 326.25 and wind <= 348.75 %}
+            NNW
+            {% else %}
+            ?
+            {% endif %}
+
+          weather_condition_0: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[0].condition }}
+          weather_temperature_0: >
+            {% set weather_temperature_0_temp = state_attr('sensor.weather_forecast', 'forecast')[0].temperature  %}
+            {% if weather_temperature_0_temp == None  %}
+              {{ state_attr('weather.kord', 'temperature') | round(0) }}
+            {% else %}
+              {{ state_attr('sensor.weather_forecast', 'forecast')[0].temperature }}
+            {% endif %}
+          weather_templow_0: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[0].templow | round(0) }}
+          weather_humid_0: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[0].humidity | round(0) }}
+          weather_rain_0: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[0].precipitation_probability | round(0) }}
+          weather_day_0: >
+            {% set days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] %}
+            {{ days[as_timestamp(state_attr('sensor.weather_forecast', 'forecast')[0].datetime) | timestamp_custom('%w') | int] }}
+          weather_time_0: >
+            {{as_timestamp(state_attr('sensor.weather_forecast', 'forecast')[0].datetime) | timestamp_custom('%H:%M') }}
+
+          weather_condition_1: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[1].condition }}
+          weather_temperature_1: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[1].temperature | round(0) }}
+          weather_templow_1: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[1].templow | round(0) }}
+          weather_humid_1: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[1].humidity | round(0) }}
+          weather_rain_1: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[1].precipitation_probability | round(0) }}
+          weather_day_1: >
+            {% set days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] %}
+            {{ days[as_timestamp(state_attr('sensor.weather_forecast', 'forecast')[1].datetime) | timestamp_custom('%w') | int] }}
+          weather_time_1: >
+            {{as_timestamp(state_attr('sensor.weather_forecast', 'forecast')[1].datetime) | timestamp_custom('%H:%M') }}
+
+          weather_condition_2: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[2].condition }}
+          weather_temperature_2: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[2].temperature | round(0) }}
+          weather_templow_2: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[2].templow | round(0) }}
+          weather_humid_2: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[2].humidity | round(0) }}
+          weather_rain_2: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[2].precipitation_probability | round(0) }}
+          weather_day_2: >
+            {% set days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] %}
+            {{ days[as_timestamp(state_attr('sensor.weather_forecast', 'forecast')[2].datetime) | timestamp_custom('%w') | int] }}
+          weather_time_2: >
+            {{as_timestamp(state_attr('sensor.weather_forecast', 'forecast')[2].datetime) | timestamp_custom('%H:%M') }}
+
+          weather_condition_3: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[3].condition }}
+          weather_temperature_3: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[3].temperature | round(0) }}
+          weather_templow_3: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[3].templow | round(0) }}
+          weather_humid_3: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[3].humidity | round(0) }}
+          weather_rain_3: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[3].precipitation_probability | round(0) }}
+          weather_day_3: >
+            {% set days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] %}
+            {{ days[as_timestamp(state_attr('sensor.weather_forecast', 'forecast')[3].datetime) | timestamp_custom('%w') | int] }}
+          weather_time_3: >
+            {{as_timestamp(state_attr('sensor.weather_forecast', 'forecast')[3].datetime) | timestamp_custom('%H:%M') }}
+
+          weather_condition_4: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[4].condition }}
+          weather_temperature_4: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[4].temperature | round(0) }}
+          weather_templow_4: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[4].templow | round(0) }}
+          weather_humid_4: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[4].humidity | round(0) }}
+          weather_rain_4: >
+            {{ state_attr('sensor.weather_forecast', 'forecast')[4].precipitation_probability | round(0) }}
+          weather_day_4: >
+            {% set days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] %}
+            {{ days[as_timestamp(state_attr('sensor.weather_forecast', 'forecast')[4].datetime) | timestamp_custom('%w') | int] }}
+          weather_time_4: >
+            {{as_timestamp(state_attr('sensor.weather_forecast', 'forecast')[4].datetime) | timestamp_custom('%H:%M') }}
+
+          sun_next_rising: >
+            {{ as_timestamp(state_attr("sun.sun", "next_rising"))| timestamp_custom('%H:%M') }}
+          sun_next_setting: >
+            {{ as_timestamp(state_attr("sun.sun", "next_setting"))| timestamp_custom('%H:%M') }}
+          moon_phase: >
+            {{ states('sensor.moon_phase') }}
+
+          day_full: >
+            {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+            {{ days[now().weekday()] }}
+
+          datum: >
+            {% set months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] %}
+            {{ now().day }} {{ months[now().month-1] }} {{ now().year }}
