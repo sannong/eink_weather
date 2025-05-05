@@ -33,7 +33,7 @@ globals:
     initial_value: 'false'
   - id: recorded_display_refresh
     type: int
-    restore_value: yes
+    restore_value: no
     initial_value: '0'
 
 # Script for updating screen - Refresh display and publish refresh count and time. (Thanks @paviro!)
@@ -81,9 +81,11 @@ time:
               else:
                 - logger.log: "No sensors updated - skipping display refresh."
 
+
 sensor:
+# Display refreshes sensor 
   - platform: template
-    name: ${friendly_name} Display refreshes
+    name: ${friendly_name} - Display refreshes
     id: display_refreshes
     accuracy_decimals: 0    
     unit_of_measurement: Refreshes
@@ -92,11 +94,28 @@ sensor:
     lambda: |-
       return id(recorded_display_refresh);               
 
-# Last update  
+# Last data update  
   - platform: template
-    name: ${friendly_name} Last Update
+    name: ${friendly_name} - Last Update
     device_class: timestamp
     id: display_last_update
+
+# Wifi signal strength
+  - platform: wifi_signal
+    name: "${friendly_name} - WiFi Signal Strength dBm"
+    id: wifi_signal_db
+    unit_of_measurement: "dBm"
+    entity_category: "diagnostic"
+    update_interval: 60s
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "${friendly_name} - WiFi Signal Strength Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
 
 # Weather (temperture, temperature low, rain)
   - platform: homeassistant
@@ -242,13 +261,10 @@ sensor:
     on_value: 
       lambda: |-
         id(data_updated) = true;
-    
-text_sensor:
-  - platform: template
-    name: ${friendly_name} Update status
-    id: update_status
-    update_interval: never
 
+# Text sensors  
+text_sensor:
+# Wifi/Connection Info Sensors  
   - platform: wifi_info
     ip_address:
       name: ${friendly_name} IP Address
@@ -379,7 +395,7 @@ text_sensor:
       lambda: |-
         id(data_updated) = true;
 
-# Datum + dag
+# Date + day
   - platform: homeassistant
     entity_id: sensor.e_paper_display_data
     attribute: day_full
@@ -665,17 +681,16 @@ display:
 
       // Show loading screen before data is received.
       if (id(initial_data_received) == false) {
-        it.printf(240, 390, id(font_small_bold), color_text, TextAlign::TOP_CENTER, "WAITING FOR DATA...");
+        it.printf(240, 390, id(font_small_bold), color_text, TextAlign::TOP_CENTER, "WAITING FOR DATA... xres %d, yres %d", xres, yres);
       } else {
 
       // date section
       int date_xoffset = 10;
       int date_yoffset = 10;
         // Print full weekday name
-        it.printf(date_xoffset, date_yoffset, id(font_dag), TextAlign::TOP_LEFT, "%s", id(day_full).state.c_str());
-        int day_size = GetTextWidth(&it, id(font_dag), "%s", id(day_full).state.c_str());
+        it.printf(date_xoffset, date_yoffset, id(font_dag), TextAlign::TOP_LEFT, "%s -", id(day_full).state.c_str());
+        int day_size = GetTextWidth(&it, id(font_dag), "%s -", id(day_full).state.c_str());
         //  Print full date
-        //it.printf(date_xoffset, date_yoffset+30, id(font_dag), TextAlign::TOP_LEFT, "%s", id(datum).state.c_str());
         it.printf(date_xoffset + day_size+10, date_yoffset, id(font_dag), TextAlign::TOP_LEFT, "%s", id(datum).state.c_str());
 
       // Weather Section
