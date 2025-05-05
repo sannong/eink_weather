@@ -537,6 +537,7 @@ font:
       - "\U000F0E02" # mdi-thermometer-chevron-down    
       - "\U000F050F" # mdi-thermometer
       - "\U000F0E0A" # mdi-water-outline
+      - "\U000F058E" # mdi-water-percent
 
 
   - file: 'fonts/materialdesignicons-webfont.ttf'
@@ -610,14 +611,14 @@ display:
 
       std::map<std::string, std::string> moon_description
         {
-          {"first_quarter", "Eerste kwartier"},
-          {"full_moon", "Volle maan"},
-          {"last_quarter", "Laatste kwartier"},
-          {"new_moon", "Nieuwe maan"},
-          {"waning_crescent", "Afnemende halve maan"},
-          {"waning_gibbous", "Afnemende maan"},
-          {"waxing_crescent", "Wassende halve maan"},
-          {"waxing_gibbous", "Wassende maan"},
+          {"first_quarter", "First Quarter"},
+          {"full_moon", "Full Moon"},
+          {"last_quarter", "Last Quarter"},
+          {"new_moon", "New Moon"},
+          {"waning_crescent", "Waning Crescent"},
+          {"waning_gibbous", "Waning Gibbous"},
+          {"waxing_crescent", "Waxing Crescent"},
+          {"waxing_gibbous", "Waxing Gibbous"},
           
         };
 
@@ -674,24 +675,23 @@ display:
         it.printf(date_xoffset, date_yoffset, id(font_dag), TextAlign::TOP_LEFT, "%s", id(day_full).state.c_str());
         int day_size = GetTextWidth(&it, id(font_dag), "%s", id(day_full).state.c_str());
         //  Print full date
-        //it.printf(date_xoffset, date_yoffset+30, id(font_datum), TextAlign::TOP_LEFT, "%s", id(datum).state.c_str());
-        it.printf(date_xoffset + day_size+10, date_yoffset, id(font_datum), TextAlign::TOP_LEFT, "%s", id(datum).state.c_str());
+        //it.printf(date_xoffset, date_yoffset+30, id(font_dag), TextAlign::TOP_LEFT, "%s", id(datum).state.c_str());
+        it.printf(date_xoffset + day_size+10, date_yoffset, id(font_dag), TextAlign::TOP_LEFT, "%s", id(datum).state.c_str());
 
       // Weather Section
-      int wy_offset = date_yoffset + 35; //weather y offset
+      int wy_offset = date_yoffset + 40; //weather y offset
         //  WEATHER STATE ICON
         it.printf(80, wy_offset, id(font_mdi_large), TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_condition_now).state.c_str()].c_str());
         // TEMPERATURE
-        it.printf(330, wy_offset, id(font_large_bold), TextAlign::TOP_RIGHT, "%.0f", id(weather_temperature_now).state);
-        it.print(330, wy_offset, id(font_degree), TextAlign::TOP_LEFT, "°F");    
+        it.printf(330, wy_offset+15, id(font_large_bold), TextAlign::TOP_RIGHT, "%.0f", id(weather_temperature_now).state);
+        it.print(330, wy_offset+15, id(font_degree), TextAlign::TOP_LEFT, "°F");    
 
         int w_x_offset = 10;  
-        int w_y_offset = 190;   
-
+        int w_y_offset = 200;   
 
         //  Print rain
         it.printf(w_x_offset, w_y_offset, id(font_mdi_small), TextAlign::CENTER_LEFT, "\U000F0E0A");
-        it.printf(w_x_offset+35, w_y_offset, id(font_small_bold), TextAlign::CENTER_LEFT, "%.1f mm", id(weather_rain_0).state);  
+        it.printf(w_x_offset+35, w_y_offset, id(font_small_bold), TextAlign::CENTER_LEFT, "%.0f%%", id(weather_rain_0).state);  
 
         w_x_offset += 110; 
 
@@ -699,6 +699,11 @@ display:
         it.printf(w_x_offset, w_y_offset, id(font_mdi_small), TextAlign::CENTER_LEFT, "\U000F050F");
         it.printf(w_x_offset+35, w_y_offset, id(font_small_bold), TextAlign::CENTER_LEFT, "%.0f°F | %.0f°F", id(weather_templow_0).state, id(weather_temperature_0).state);
 
+        w_x_offset += 160; 
+
+        //  Print humidity
+        it.printf(w_x_offset, w_y_offset, id(font_mdi_small), TextAlign::CENTER_LEFT, "\U000F058E");
+        it.printf(w_x_offset+35, w_y_offset, id(font_small_bold), TextAlign::CENTER_LEFT, "%.0f%%",id(weather_humid_now).state);
 
         w_x_offset = 10; 
         w_y_offset += 35;         
@@ -710,7 +715,7 @@ display:
 
         //  Print windspeed
         it.printf(w_x_offset, w_y_offset, id(font_mdi_small), TextAlign::CENTER_LEFT, "\U000F059D");
-        it.printf(w_x_offset+35, w_y_offset, id(font_small_bold), TextAlign::CENTER_LEFT, "%.1f km/h (%.0f Bft %s)", id(weather_wind_speed_now).state, id(weather_wind_speed_now).state, id(weather_wind_direction_now).state.c_str());
+        it.printf(w_x_offset+35, w_y_offset, id(font_small_bold), TextAlign::CENTER_LEFT, "%.1f Mph (%s)", id(weather_wind_speed_now).state, id(weather_wind_direction_now).state.c_str());
 
         w_x_offset = 10; 
         w_y_offset += 35; 
@@ -725,17 +730,15 @@ display:
         it.printf(w_x_offset+35, w_y_offset, id(font_small_bold), TextAlign::CENTER_LEFT, "%s", moon_description[id(moon_phase).state.c_str()].c_str());             
       
       // Weather forecast section
-      int forecast_yoffset = 320;
-      it.print(10, forecast_yoffset, id(font_headings), TextAlign::BOTTOM_LEFT, "Weersvoorspelling");
-      
-      forecast_yoffset += 10;
+      int forecast_yoffset = 310;
+
       int fcst_xstart = 45;
       int fcst_offset = 80;
         it.printf(fcst_xstart, forecast_yoffset,    id(font_small_black), TextAlign::TOP_CENTER, "%s", id(weather_day_0).state.c_str());
         it.printf(fcst_xstart, forecast_yoffset+20, id(font_mdi_medium), TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_condition_0).state.c_str()].c_str());
         it.printf(fcst_xstart, forecast_yoffset+72, id(font_small_bold), TextAlign::TOP_CENTER, "%.0f°F", id(weather_temperature_0).state);
         it.printf(fcst_xstart, forecast_yoffset+100, id(font_small), TextAlign::TOP_CENTER, "%.0f°F", id(weather_templow_0).state);
-        it.printf(fcst_xstart, forecast_yoffset+128, id(font_small), TextAlign::TOP_CENTER, "%.1f mm", id(weather_rain_0).state);
+        it.printf(fcst_xstart, forecast_yoffset+128, id(font_small), TextAlign::TOP_CENTER, "%.0f%%", id(weather_rain_0).state);
 
 
         fcst_xstart += fcst_offset;
@@ -743,28 +746,28 @@ display:
         it.printf(fcst_xstart, forecast_yoffset+20, id(font_mdi_medium), TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_condition_1).state.c_str()].c_str());
         it.printf(fcst_xstart, forecast_yoffset+72, id(font_small_bold), TextAlign::TOP_CENTER, "%.0f°F", id(weather_temperature_1).state);
         it.printf(fcst_xstart, forecast_yoffset+100, id(font_small), TextAlign::TOP_CENTER, "%.0f°F", id(weather_templow_1).state);
-        it.printf(fcst_xstart, forecast_yoffset+128, id(font_small), TextAlign::TOP_CENTER, "%.1f mm", id(weather_rain_1).state);
+        it.printf(fcst_xstart, forecast_yoffset+128, id(font_small), TextAlign::TOP_CENTER, "%.0f%%", id(weather_rain_1).state);
 
         fcst_xstart += fcst_offset;
         it.printf(fcst_xstart, forecast_yoffset,    id(font_small_black), TextAlign::TOP_CENTER, "%s", id(weather_day_2).state.c_str());
         it.printf(fcst_xstart, forecast_yoffset+20, id(font_mdi_medium), TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_condition_2).state.c_str()].c_str());
         it.printf(fcst_xstart, forecast_yoffset+72, id(font_small_bold), TextAlign::TOP_CENTER, "%.0f°F", id(weather_temperature_2).state);
         it.printf(fcst_xstart, forecast_yoffset+100, id(font_small), TextAlign::TOP_CENTER, "%.0f°F", id(weather_templow_2).state);
-        it.printf(fcst_xstart, forecast_yoffset+128, id(font_small), TextAlign::TOP_CENTER, "%.1f mm", id(weather_rain_2).state);
+        it.printf(fcst_xstart, forecast_yoffset+128, id(font_small), TextAlign::TOP_CENTER, "%.0f%%", id(weather_rain_2).state);
 
         fcst_xstart += fcst_offset;
         it.printf(fcst_xstart, forecast_yoffset,    id(font_small_black), TextAlign::TOP_CENTER, "%s", id(weather_day_3).state.c_str());
         it.printf(fcst_xstart, forecast_yoffset+20, id(font_mdi_medium), TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_condition_3).state.c_str()].c_str());
         it.printf(fcst_xstart, forecast_yoffset+72, id(font_small_bold), TextAlign::TOP_CENTER, "%.0f°F", id(weather_temperature_3).state);
         it.printf(fcst_xstart, forecast_yoffset+100, id(font_small), TextAlign::TOP_CENTER, "%.0f°F", id(weather_templow_3).state);
-        it.printf(fcst_xstart, forecast_yoffset+128, id(font_small), TextAlign::TOP_CENTER, "%.1f mm", id(weather_rain_3).state);
+        it.printf(fcst_xstart, forecast_yoffset+128, id(font_small), TextAlign::TOP_CENTER, "%.0f%%", id(weather_rain_3).state);
 
         fcst_xstart += fcst_offset;
         it.printf(fcst_xstart, forecast_yoffset,    id(font_small_black), TextAlign::TOP_CENTER, "%s", id(weather_day_4).state.c_str());
         it.printf(fcst_xstart, forecast_yoffset+20, id(font_mdi_medium), TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_condition_4).state.c_str()].c_str());
         it.printf(fcst_xstart, forecast_yoffset+72, id(font_small_bold), TextAlign::TOP_CENTER, "%.0f°F", id(weather_temperature_4).state);
         it.printf(fcst_xstart, forecast_yoffset+100, id(font_small), TextAlign::TOP_CENTER, "%.0f°F", id(weather_templow_4).state);
-        it.printf(fcst_xstart, forecast_yoffset+128, id(font_small), TextAlign::TOP_CENTER, "%.1f mm", id(weather_rain_4).state);        
+        it.printf(fcst_xstart, forecast_yoffset+128, id(font_small), TextAlign::TOP_CENTER, "%.0f%%", id(weather_rain_4).state);        
 
         it.line(425, 10, 425, 470);    
       }

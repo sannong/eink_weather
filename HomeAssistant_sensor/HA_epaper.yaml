@@ -28,8 +28,10 @@ template:
           {{ -delta }}
         state_class: measurement
   - trigger:
-      - trigger: time_pattern
-        hours: /1
+      - trigger: state
+        entity_id: sensor.weather_forecast
+      - trigger: state
+        entity_id: weather.kord
       - trigger: homeassistant
         event: start
     sensor:
@@ -188,4 +190,4 @@ template:
 
           datum: >
             {% set months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] %}
-            {{ now().day }} {{ months[now().month-1] }} {{ now().year }}
+            {{ months[now().month-1] }} {{ now().day }}  {{ now().year }}
