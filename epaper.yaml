@@ -20,7 +20,7 @@ button:
     entity_category: config
     on_press:
       - script.execute: update_screen
-       
+
 # Global variables for detecting if the display needs to be refreshed. (Thanks @paviro!)
 globals:
   - id: data_updated
@@ -50,7 +50,10 @@ script:
 esphome:
   name: ${device_name} 
   includes:
-    - includes/text_utils.h  
+    - includes/calendar_utilities.h
+    - includes/text_utilities.h
+    - includes/time_utilities.h
+    - includes/misc_utilities.h
   on_boot:
       priority: 200.0
       then:
@@ -81,6 +84,7 @@ time:
               else:
                 - logger.log: "No sensors updated - skipping display refresh."
 
+json:
 
 sensor:
 # Display refreshes sensor 
@@ -262,6 +266,12 @@ sensor:
       lambda: |-
         id(data_updated) = true;
 
+# Calendar 
+  - platform: homeassistant
+    entity_id: sensor.esp_calendar_data
+    attribute: closest_end_time
+    id: closest_end_time
+    
 # Text sensors  
 text_sensor:
 # Wifi/Connection Info Sensors  
@@ -418,7 +428,26 @@ text_sensor:
     id: datum
     on_value: 
       lambda: |-
-        id(data_updated) = true;           
+        id(data_updated) = true;  
+
+# Calendar
+  - platform: homeassistant
+    entity_id: sensor.esp_calendar_data
+    attribute: entries
+    id: calendar_json
+    on_value: 
+      lambda: |-
+        id(data_updated) = true; 
+    
+  - platform: homeassistant
+    entity_id: sensor.esp_calendar_data
+    attribute: todays_day_name
+    id: todays_day_name
+    
+  - platform: homeassistant
+    entity_id: sensor.esp_calendar_data
+    attribute: todays_date_month_year
+    id: todays_date_month_year         
 
 font:
   - file: 'fonts/Avenir Medium.ttf'
@@ -451,6 +480,11 @@ font:
     id: font_medium
     size: 24
     glyphs: *default-glyphs      
+
+  - file: 'fonts/Avenir Black.ttf'
+    id: font_bold
+    size: 24
+    glyphs: *default-glyphs   
 
   - file: 'fonts/Avenir Medium.ttf'
     id: font_large_bold
@@ -522,6 +556,7 @@ font:
       - "\U000F0A7A" # mdi-trash-can-outline
       - "\U000F0E17" # mdi-calendar
       - "\U000F0083" # mdi-battery-alert
+      - "\U000F0E8E" # calendar-sync
 
   - file: 'fonts/materialdesignicons-webfont.ttf'
     id: font_mdi_medium
@@ -554,7 +589,6 @@ font:
       - "\U000F050F" # mdi-thermometer
       - "\U000F0E0A" # mdi-water-outline
       - "\U000F058E" # mdi-water-percent
-
 
   - file: 'fonts/materialdesignicons-webfont.ttf'
     id: font_mdi_footer
@@ -610,6 +644,7 @@ display:
     reset_duration: 2ms
     model: 7.50inV2p
     update_interval: never
+    full_update_every: 30
     rotation: 0°
     lambda: |-
       std::map<std::string, std::string> moon_icon_map
@@ -651,6 +686,7 @@ display:
           {"lightning", "\U000F0593"},
           {"lightning-rainy", "\U000F067E"},
           {"night", "\U000F0594"},
+          {"clear-night", "\U000F0594"},
           {"night-partly-cloudy", "\U000F0F31"},
           {"partlycloudy", "\U000F0595"},
           {"partly-lightning", "\U000F0F32"},
@@ -784,6 +820,73 @@ display:
         it.printf(fcst_xstart, forecast_yoffset+100, id(font_small), TextAlign::TOP_CENTER, "%.0f°F", id(weather_templow_4).state);
         it.printf(fcst_xstart, forecast_yoffset+128, id(font_small), TextAlign::TOP_CENTER, "%.0f%%", id(weather_rain_4).state);        
 
-        it.line(425, 10, 425, 470);    
+        it.line(425, 10, 425, 470);  
+
+        // Calendar section
+       int cal_xstart = 440;
+       auto time = id(esptime).now();
+
+       // Calculate today date width
+        int day_of_month_width = get_text_width( & it, id(font_large_bold), "%d", time.day_of_month);
+        int todays_day_name_width = get_text_width( & it, id(font_medium), "%s", id(todays_day_name).state.c_str());
+        int day_title_width = get_text_width( & it, id(font_small), "%s", id(todays_date_month_year).state.c_str());
+        
+        int todays_date_widths[3] = {day_of_month_width, todays_day_name_width, day_title_width};
+        int max_todays_date_width = find_max_in_array(todays_date_widths, 3);
+        
+        int todays_date_x_offset = cal_xstart;
+
+        it.printf(max_todays_date_width / 2 + todays_date_x_offset, 10, id(font_large_bold), TextAlign::TOP_CENTER, "%d", time.day_of_month);
+        it.printf(max_todays_date_width / 2 + todays_date_x_offset, 110, id(font_medium), TextAlign::TOP_CENTER, "%s", id(todays_day_name).state.c_str());
+        it.printf(max_todays_date_width / 2 + todays_date_x_offset, 140, id(font_small), TextAlign::TOP_CENTER, "%s", id(todays_date_month_year).state.c_str());
+      
+      // Draw Calendar
+
+        int calendar_x_pos = todays_date_x_offset + max_todays_date_width +40;
+        int calendar_y_pos = 25; 
+        int days_padding_bottom = 5;
+        int circle_size = 11;
+        int cell_size_width = 35;
+        int cell_size_height = 24;
+
+        auto color_background = Color::BLACK; 
+        char cal[7][7][3]; // Calendar matrix including weekdays
+        int days_line_left_position = 0;
+        int days_line_right_position = 0;
+    
+        get_calendar_matrix(time.year, time.month, cal);
+    
+        for (int i = 0; i < 7; i++) {
+          for (int j = 0; j < 7; j++) {
+            int x_pos = calendar_x_pos + cell_size_width * j;
+            int y_pos = calendar_y_pos + cell_size_height * i;
+    
+            if (i == 0) {
+              // Header (day names)
+              it.printf(x_pos, y_pos, id(font_small_bold), TextAlign::CENTER, "%s", cal[i][j]);
+              if (j == 0) {
+                days_line_left_position = x_pos - (get_text_width( & it, id(font_footer), "%s", cal[i][j]) / 2);
+              } else if (j == 6) {
+                days_line_right_position = x_pos + (get_text_width( & it, id(font_footer), "%s", cal[i][j]) / 2);
+              }
+            } else {
+              // Day numbers
+              y_pos += days_padding_bottom;
+              if (atoi(cal[i][j]) == time.day_of_month) {
+                // Highlight current day
+                it.filled_circle(x_pos, y_pos - 1, circle_size);
+                it.printf(x_pos, y_pos, id(font_footer), color_background, TextAlign::CENTER, "%s", cal[i][j]);
+              } else {
+                it.printf(x_pos, y_pos, id(font_footer), TextAlign::CENTER, "%s", cal[i][j]);
+              }
+            }
+          }
+          if (i == 1) {
+            it.line(days_line_left_position, calendar_y_pos + (cell_size_height / 2), days_line_right_position, calendar_y_pos + (cell_size_height / 2));
+          }
+        }
+    
+        // End Draw Calendar
+
       }
 

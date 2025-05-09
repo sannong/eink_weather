@@ -1,5 +1,9 @@
+# Enable python script support needed for the calendar data conversion
+python_script:
+
 # Weather
 template:
+  # Weatrher forecast
   - trigger:
       - trigger: time_pattern
         hours: /1
@@ -18,6 +22,42 @@ template:
         state: "{{ now().isoformat() }}"
         attributes:
           forecast: "{{ daily['weather.weather_ch'].forecast }}"
+  # Calendar        
+  - trigger:
+      - platform: time_pattern
+        hours: /1
+      - trigger: homeassistant
+        event: start
+    action:
+        # Get the calendar data
+        - service: calendar.get_events
+          data:
+            duration:
+              # How many days into the future entries should be fetched
+              days: 7
+          target:
+            entity_id:
+              # Add your calendar entity id's here
+              - calendar.bensanda_gmail_com
+              - calendar.jppalmateer_gmail_com
+          response_variable: calendar_response
+        # Convert the received data into our custom format that the ESPHome firmware expects via a python script
+        - service: python_script.esp_calendar_data_conversion
+          data:
+            calendar: "{{ calendar_response }}"
+            now: "{{ now().date() }}"
+          response_variable: calendar_converted
+    sensor:
+        - name: ESP Calendar Data
+          state: "OK"
+          attributes:
+            todays_day_name: >
+              {{ ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][now().weekday()] }}
+            todays_date_month_year: >
+              {% set months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] %}
+              {{ months[now().month-1] }} {{  now().strftime('%Y') }}
+            closest_end_time: "{{ as_timestamp(calendar_converted.closest_end_time, default=0) }}"
+            entries: "{{ calendar_converted.entries }}"
   - sensor:
       - unique_id: e_paper_dagen_op_accu
         name: E-paper op accu
@@ -31,7 +71,7 @@ template:
       - trigger: state
         entity_id: sensor.weather_forecast
       - trigger: state
-        entity_id: weather.kord
+        entity_id: weather.weather_ch
       - trigger: homeassistant
         event: start
     sensor:
@@ -42,20 +82,20 @@ template:
         state: "OK"
         attributes:
           weather_condition_now: >
-            {% set cond_now = states('weather.kord') %}
+            {% set cond_now = states('weather.weather_ch') %}
             {% if states('sun.sun') == 'below_horizon' %}
                 {% if cond_now == 'sunny' %} night {% elif cond_now == 'partlycloudy' %} night-partly-cloudy {% else %} {{ cond_now }} {% endif %}
             {% else %}
                 {{ cond_now }}
             {% endif %}
           weather_temperature_now: >
-            {{ state_attr('weather.kord', 'temperature') | round(0) }}
+            {{ state_attr('weather.weather_ch', 'temperature') | round(0) }}
           weather_humid_now: >
-            {{ state_attr('weather.kord', 'humidity') | round(0) }}
+            {{ state_attr('weather.weather_ch', 'humidity') | round(0) }}
           weather_wind_speed_now: >
-            {{ state_attr('weather.kord', 'wind_speed') | round(0) }}
+            {{ state_attr('weather.weather_ch', 'wind_speed') | round(0) }}
           weather_wind_direction_now: >
-            {% set wind = state_attr('weather.kord', 'wind_bearing') %}
+            {% set wind = state_attr('weather.weather_ch', 'wind_bearing') %}
             {% if wind >= 348.75 or wind <= 11.25 %}
             N
             {% elif wind >= 11.25 and wind <= 33.75 %}
@@ -97,7 +137,7 @@ template:
           weather_temperature_0: >
             {% set weather_temperature_0_temp = state_attr('sensor.weather_forecast', 'forecast')[0].temperature  %}
             {% if weather_temperature_0_temp == None  %}
-              {{ state_attr('weather.kord', 'temperature') | round(0) }}
+              {{ state_attr('weather.weather_ch', 'temperature') | round(0) }}
             {% else %}
               {{ state_attr('sensor.weather_forecast', 'forecast')[0].temperature }}
             {% endif %}
