@@ -3,7 +3,7 @@ python_script:
 
 # Weather
 template:
-  # Weatrher forecast
+  # Weather forecast
   - trigger:
       - trigger: time_pattern
         hours: /1
@@ -38,8 +38,8 @@ template:
           target:
             entity_id:
               # Add your calendar entity id's here
-              - calendar.bensanda_gmail_com
-              - calendar.jppalmateer_gmail_com
+              - !secret calendar1
+              - !secret calendar2
           response_variable: calendar_response
         # Convert the received data into our custom format that the ESPHome firmware expects via a python script
         - service: python_script.esp_calendar_data_conversion
@@ -92,6 +92,8 @@ template:
             {{ state_attr('weather.weather_ch', 'temperature') | round(0) }}
           weather_humid_now: >
             {{ state_attr('weather.weather_ch', 'humidity') | round(0) }}
+          weather_apparent_temperature_now: >
+            {{ state_attr('weather.weather_ch', 'apparent_temperature') | round(0) }}
           weather_wind_speed_now: >
             {{ state_attr('weather.weather_ch', 'wind_speed') | round(0) }}
           weather_wind_direction_now: >
