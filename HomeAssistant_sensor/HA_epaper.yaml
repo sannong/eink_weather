@@ -40,6 +40,7 @@ template:
               # Add your calendar entity id's here
               - !secret calendar1
               - !secret calendar2
+              - !secret calendar3
           response_variable: calendar_response
         # Convert the received data into our custom format that the ESPHome firmware expects via a python script
         - service: python_script.esp_calendar_data_conversion
