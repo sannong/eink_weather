@@ -2,7 +2,7 @@
 
 This is a simple ESPHome based e-ink weather and calendar display project. I used a 7.5" waveshare e-paper display and the waveshare ESP32 universal driver module. I mounted the whole thing in a picture frame and run it off USB power (no battery).
 
-<img src="./images/bare_screen.JPEG" alt="Bare Display" width="400"/>
+<img src="./images/complete_frame.JPEG" alt="Complete Frame" width="400"/>
 
 ## Project References
 
