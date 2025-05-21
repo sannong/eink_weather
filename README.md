@@ -65,6 +65,7 @@ The display makes use of multiple templated sensors and configuration in HA_epap
                 # Add your calendar entity id's here
                 - !secret calendar1
                 - !secret calendar2
+                - !secret calendar3
     ```
 
 3. Integrate/copy the HA_epaper.yaml file into your configuration.yaml file. If a template: section already exists in your file just append the template section from the HA_epaper.yaml.
