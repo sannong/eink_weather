@@ -510,6 +510,11 @@ font:
     glyphs: ['-',' ', '°', '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', 'a', 'n']
 
   - file: 'fonts/Avenir Medium.ttf'
+    id: font_med_large_bold
+    size: 90
+    glyphs: ['-',' ', '°', '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', 'a', 'n']
+
+  - file: 'fonts/Avenir Medium.ttf'
     id: font_degree
     size: 54
     glyphs: ['°', 'C', 'F']
@@ -855,23 +860,28 @@ display:
       // Calendar section
       auto time = id(esptime).now();
       int cal_xstart = 440;
+      int cal_ystart = 25;
 
       // Calculate today date width
-      int day_of_month_width = get_text_width( & it, id(font_large_bold), "%d", time.day_of_month);
+      int day_of_month_width = get_text_width( & it, id(font_med_large_bold), "%d", time.day_of_month);
       int todays_day_name_width = get_text_width( & it, id(font_small), "%s", id(todays_day_name).state.c_str());
       int day_title_width = get_text_width( & it, id(font_small), "%s", id(todays_date_month_year).state.c_str());
       
       int todays_date_widths[3] = {day_of_month_width, todays_day_name_width, day_title_width};
       int max_todays_date_width = find_max_in_array(todays_date_widths, 3);
+      int day_name_height = get_text_height( & it, id(font_small), "%s", id(todays_day_name).state.c_str());
+      int day_height = get_text_height( & it, id(font_med_large_bold), "%d", time.day_of_month);
+      int day_name_offset = cal_ystart+day_height-20;
+      int year_offset = day_name_offset+day_name_height+2;
 
-      it.printf(cal_xstart + max_todays_date_width / 2, 10, id(font_large_bold), TextAlign::TOP_CENTER, "%d", time.day_of_month);
-      it.printf(cal_xstart + max_todays_date_width / 2, 110, id(font_medium), TextAlign::TOP_CENTER, "%s", id(todays_day_name).state.c_str());
-      it.printf(cal_xstart + max_todays_date_width / 2, 140, id(font_small), TextAlign::TOP_CENTER, "%s", id(todays_date_month_year).state.c_str());
+      it.printf(cal_xstart + max_todays_date_width / 2, cal_ystart, id(font_med_large_bold), TextAlign::TOP_CENTER, "%d", time.day_of_month);
+      it.printf(cal_xstart + max_todays_date_width / 2, day_name_offset, id(font_small), TextAlign::TOP_CENTER, "%s", id(todays_day_name).state.c_str());
+      it.printf(cal_xstart + max_todays_date_width / 2, year_offset, id(font_small), TextAlign::TOP_CENTER, "%s", id(todays_date_month_year).state.c_str());
     
       // Draw Calendar
 
       int calendar_x_pos = cal_xstart + max_todays_date_width +40;
-      int calendar_y_pos = 25; 
+      int calendar_y_pos = cal_ystart+15; 
       int days_padding_bottom = 5;
       int circle_size = 11;
       int cell_size_width = 35;
@@ -927,7 +937,7 @@ display:
         deserializeJson(doc, id(calendar_json).state.c_str());
         JsonArray entries = doc.as<JsonArray>();
     
-        int current_y_position = 190; // Initial vertical position
+        int current_y_position = cal_ystart+170; // Initial vertical position
         int start_x_position = cal_xstart; // Initial horizontal position
         int date_event_line_padding = 10; // Padding between date and event line
         const int max_y_position = 470; // Maximum vertical position
