@@ -855,7 +855,7 @@ display:
       it.printf(fcst_xstart, forecast_yoffset+128, id(font_small), TextAlign::TOP_CENTER, "%.0f%%", id(weather_rain_4).state);        
 
       // Draw vertical line between weather and calendar
-      it.line(425, 10, 425, 470);  
+      it.line(415, 10, 415, 470);  
 
       // Calendar section
       auto time = id(esptime).now();
