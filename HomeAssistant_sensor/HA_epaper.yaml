@@ -54,9 +54,9 @@ template:
           attributes:
             todays_day_name: >
               {{ ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][now().weekday()] }}
-            todays_date_month_year: >
+            todays_date_month: >
               {% set months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] %}
-              {{ months[now().month-1] }} {{  now().strftime('%Y') }}
+              {{ months[now().month-1] }}
             closest_end_time: "{{ as_timestamp(calendar_converted.closest_end_time, default=0) }}"
             entries: "{{ calendar_converted.entries }}"
   - sensor:
@@ -88,6 +88,13 @@ template:
                 {% if cond_now == 'sunny' %} night {% elif cond_now == 'partlycloudy' %} night-partly-cloudy {% else %} {{ cond_now }} {% endif %}
             {% else %}
                 {{ cond_now }}
+            {% endif %}
+          weather_alert_number: >
+            {{states('sensor.nws_alerts_alerts') | int}}
+          weather_alert_now: >
+            {% set num_alerts = states('sensor.nws_alerts_alerts') | int  %}
+            {% if num_alerts != 0 %} 
+                {{ state_attr('sensor.nws_alerts_alerts', 'Alerts')[0].Event }}
             {% endif %}
           weather_temperature_now: >
             {{ state_attr('weather.weather_ch', 'temperature') | round(0) }}

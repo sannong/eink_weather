@@ -129,6 +129,14 @@ sensor:
     on_value: 
       lambda: |-
         id(data_updated) = true;
+  
+  - platform: homeassistant
+    entity_id: sensor.e_paper_display_data
+    attribute: weather_alert_number
+    id: weather_alert_number
+    on_value: 
+      lambda: |-
+        id(data_updated) = true;
 
   - platform: homeassistant
     entity_id: sensor.e_paper_display_data
@@ -293,6 +301,16 @@ text_sensor:
 #Weather (condition, day) 
   - platform: homeassistant
     entity_id: sensor.e_paper_display_data
+    attribute: weather_alert_now
+    id: weather_alert_now
+    filters:
+      - to_upper:
+    on_value: 
+      lambda: |-
+        id(data_updated) = true;
+
+  - platform: homeassistant
+    entity_id: sensor.e_paper_display_data
     attribute: weather_condition_now
     id: weather_condition_now
     on_value: 
@@ -454,8 +472,8 @@ text_sensor:
     
   - platform: homeassistant
     entity_id: sensor.esp_calendar_data
-    attribute: todays_date_month_year
-    id: todays_date_month_year         
+    attribute: todays_date_month
+    id: todays_date_month         
 
 font:
   - file: 'fonts/Avenir Medium.ttf'
@@ -540,7 +558,7 @@ font:
     glyphs: *default-glyphs
 
   - file: 'fonts/Avenir Heavy.ttf'
-    id: font_bold_25
+    id: font_bold_20
     size: 20
     glyphs: *default-glyphs
 
@@ -646,20 +664,6 @@ font:
     size: 30
     glyphs: ['0', '@', 'G', 'T', 'W', 'Q', 'D', 'J']
 
-# Define colors
-# This design is white on black so this is necessary.
-color:
-  - id: color_bg
-    red: 0%
-    green: 0%
-    blue: 0%
-    white: 0%
-  - id: color_text
-    red: 0%
-    green: 0%
-    blue: 0%
-    white: 100%
-
 # Pins for Waveshare ePaper ESP Board
 spi:
   clk_pin: GPIO13
@@ -751,13 +755,29 @@ display:
 
       // Show loading screen before data is received.
       if (id(initial_data_received) == false) {
-        it.printf(240, 390, id(font_small_bold), color_text, TextAlign::TOP_CENTER, "WAITING FOR DATA... xres %d, yres %d", xres, yres);
+        it.printf(240, 390, id(font_small_bold), TextAlign::TOP_CENTER, "WAITING FOR DATA... xres %d, yres %d", xres, yres);
       } else {
 
       // Weather Section
       int wy_offset = 10; //weather y offset
       int column2_x_offset = 120;
       int column3_x_offset = 180;
+      int alert_offset_weather = 0;
+      int alert_offset_forecast = 0;
+
+      // If there is an active weather alert, display it
+      if (id(weather_alert_number).state != 0) {
+        // Display the weather alert as white text on a black rectangle
+        int alert_height = get_text_height( & it, id(font_bold_20), "%s", id(weather_alert_now).state.c_str());
+        // draw a black rectangle for the alert
+        it.filled_rectangle(10, wy_offset, 387, alert_height + 10, COLOR_ON);
+        // print the alert text in white
+        it.printf(207, wy_offset+(alert_height-5), id(font_bold_20), COLOR_OFF, TextAlign::CENTER, "%s", id(weather_alert_now).state.c_str());
+        // adjust the subsequent sections spacing because of the alert
+        alert_offset_weather = alert_height+7;  
+        alert_offset_forecast = 15;
+        wy_offset += alert_height + 20;
+      }
 
       //  WEATHER STATE ICON
       it.printf(80, wy_offset, id(font_mdi_large), TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_condition_now).state.c_str()].c_str());
@@ -766,7 +786,7 @@ display:
       it.print(330, wy_offset+15, id(font_degree), TextAlign::TOP_LEFT, "°F");   
 
       int w_x_offset = 10;  
-      int w_y_offset = 170;   
+      int w_y_offset = 170+alert_offset_weather;   
 
       //  Print rain
       it.printf(w_x_offset, w_y_offset, id(font_mdi_small), TextAlign::CENTER_LEFT, "\U000F0E0A");
@@ -816,7 +836,7 @@ display:
       it.printf(w_x_offset+35, w_y_offset, id(font_small_bold), TextAlign::CENTER_LEFT, "%s", moon_description[id(moon_phase).state.c_str()].c_str());             
     
       // Weather forecast section
-      int forecast_yoffset = 310;
+      int forecast_yoffset = 310+alert_offset_forecast;
       int fcst_xstart = 45;
       int fcst_offset = 80;
 
@@ -865,9 +885,9 @@ display:
       // Calculate today date width
       int day_of_month_width = get_text_width( & it, id(font_med_large_bold), "%d", time.day_of_month);
       int todays_day_name_width = get_text_width( & it, id(font_small), "%s", id(todays_day_name).state.c_str());
-      int day_title_width = get_text_width( & it, id(font_small), "%s", id(todays_date_month_year).state.c_str());
+      int month_width = get_text_width( & it, id(font_small), "%s", id(todays_date_month).state.c_str());
       
-      int todays_date_widths[3] = {day_of_month_width, todays_day_name_width, day_title_width};
+      int todays_date_widths[3] = {day_of_month_width, todays_day_name_width, month_width};
       int max_todays_date_width = find_max_in_array(todays_date_widths, 3);
       int day_name_height = get_text_height( & it, id(font_small), "%s", id(todays_day_name).state.c_str());
       int day_height = get_text_height( & it, id(font_med_large_bold), "%d", time.day_of_month);
@@ -876,7 +896,7 @@ display:
 
       it.printf(cal_xstart + max_todays_date_width / 2, cal_ystart, id(font_med_large_bold), TextAlign::TOP_CENTER, "%d", time.day_of_month);
       it.printf(cal_xstart + max_todays_date_width / 2, day_name_offset, id(font_small), TextAlign::TOP_CENTER, "%s", id(todays_day_name).state.c_str());
-      it.printf(cal_xstart + max_todays_date_width / 2, year_offset, id(font_small), TextAlign::TOP_CENTER, "%s", id(todays_date_month_year).state.c_str());
+      it.printf(cal_xstart + max_todays_date_width / 2, year_offset, id(font_small), TextAlign::TOP_CENTER, "%s", id(todays_date_month).state.c_str());
     
       // Draw Calendar
 
@@ -940,7 +960,7 @@ display:
         int current_y_position = cal_ystart+170; // Initial vertical position
         int start_x_position = cal_xstart; // Initial horizontal position
         int date_event_line_padding = 10; // Padding between date and event line
-        const int max_y_position = 470; // Maximum vertical position
+        const int max_y_position = 480; // Maximum vertical position
         const int events_top_padding = 5; // Padding top first event within a day
         const int event_spacing = 10; // Spacing between the events within a day
         const int events_bottom_padding = 5; // Padding after the last entry of the day
@@ -1048,13 +1068,13 @@ display:
               summary = summary.substr(0, max_event_title_chars - 3) + "...";
             }
     
-            int summary_height = get_text_height( & it, id(font_bold_25), "%s", summary.c_str());
+            int summary_height = get_text_height( & it, id(font_bold_20), "%s", summary.c_str());
             int time_height = get_text_height( & it, id(font_small), "%s", start_time.c_str());
    
             // Check if event will still fit
             if (entry_y_position + summary_height + time_height + event_spacing <= max_y_position) {
               // Draw event summary
-              it.printf(event_start_x_position, entry_y_position, id(font_bold_25), TextAlign::TOP_LEFT, "%s", summary.c_str());
+              it.printf(event_start_x_position, entry_y_position, id(font_bold_20), TextAlign::TOP_LEFT, "%s", summary.c_str());
     
               entry_y_position += summary_height + 2;
     
