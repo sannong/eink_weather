@@ -43,8 +43,9 @@ This project uses the following integrations:
 
 - [Sun](https://www.home-assistant.io/integrations/sun)
 - [Moon](https://www.home-assistant.io/integrations/moon)
-- [The Weather Channel (HACKS)](https://github.com/jaydeethree/Home-Assistant-weatherdotcom)
+- [The Weather Channel (HACS)](https://github.com/jaydeethree/Home-Assistant-weatherdotcom)
   - You can substitute in whatever weather service you like
+- [NWS Alerts (HACS)](https://github.com/finity69x2/nws_alerts)
 - [Google Calendar](https://www.home-assistant.io/integrations/google)
 - [ESPHome](https://www.home-assistant.io/integrations/esphome)
 
