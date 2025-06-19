@@ -25,9 +25,11 @@ The following hardware was used:
 - [Waveshare 800×480, 7.5inch E-Ink display HAT for Raspberry Pi](https://www.waveshare.com/product/displays/e-paper/epaper-1/7.5inch-e-paper-hat.htm?___SID=U)
 - [Waveshare Universal e-Paper Raw Panel Driver Board, ESP32 WiFi / Bluetooth Wireless](https://www.waveshare.com/product/displays/e-paper/driver-boards/e-paper-esp32-driver-board.htm)
 - [Custom Frame and Mat](https://www.frameiteasy.com/)
-  - I custom ordered a frame with the following dimmensions to fit the screen:
+  - I custom ordered a metal frame with the following dimensions to fit the screen. The frame came with a foam board backing that I cut a small hole in to allow the ribbon cable to pass through. I then literally pressed and drove the header pins of the Waveshare driver board into the foam board to secure it in place on the back of the frame.
     - Matboard: Inner Dimension 6 1/2" x 3 15/16", Outer Dimension 8 1/2" x 5 15/16"
     - Frame: Art Size: 8 1/2" x 5 15/16"
+- [Easel](https://www.amazon.com/dp/B0979QFS9Q?th=1) 
+  - I used a Fletcher EaselMate to allow the frame to stand on a table
 
 ### Hardware Setup
 
@@ -44,10 +46,15 @@ This project uses the following integrations:
 - [Sun](https://www.home-assistant.io/integrations/sun)
 - [Moon](https://www.home-assistant.io/integrations/moon)
 - [The Weather Channel (HACS)](https://github.com/jaydeethree/Home-Assistant-weatherdotcom)
-  - You can substitute in whatever weather service you like
+  - You can substitute in whatever weather service you like but this is the configured service in the code as is
 - [NWS Alerts (HACS)](https://github.com/finity69x2/nws_alerts)
+  - This only works for USA based weather alerts, some other alert provider could be substituted in other locations
 - [Google Calendar](https://www.home-assistant.io/integrations/google)
 - [ESPHome](https://www.home-assistant.io/integrations/esphome)
+
+#### Integration Notes
+
+- NWS Alerts: Currently the display will only show the first alert for a given region configuration even if there are multiple alerts active. It displays the "Event" field of the alert so that it fits in the limited space on one line. This could be modified to show multiple alerts and/or more detail by modifying the HA_epaper.yaml weather_alert_now and weather_alert_number code.
 
 ### Python Script
 

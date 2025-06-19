@@ -50,6 +50,8 @@ def convert_calendar_format(data, today):
                     
                 # Remove the 'location' key from the event since it's been parsed into 'location_name' and 'location_address'
                 event.pop('location')
+            
+            event['summary'] = event['summary'].encode('ascii', 'ignore').decode('ascii')
                     
             # Add event to events_by_date dictionary
             if event_date in events_by_date:
