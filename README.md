@@ -4,6 +4,12 @@ This is a simple ESPHome based e-ink weather and calendar display project. I use
 
 <img src="./images/complete_frame_2.jpg" alt="Complete Frame" width="400"/>
 
+Front Of Frame
+
+<img src="./images/back_frame.JPEG" alt="Complete Frame" width="400"/>
+
+Back Of Frame
+
 ## Project References
 
 The following existing projects/reddit posts were used as reference, source code starting point, and inspiration for this work and are given credit here:
@@ -58,7 +64,7 @@ This project uses the following integrations:
 
 ### Python Script
 
-A python script is used to format the calendar event data. Copy the python_scripts folder and contents provided to your Home Assistant root directory (creating the python_scripts folder at the root level if needed)
+A python script is used to format the calendar event data. Copy the python_scripts folder and contents provided to your Home Assistant root directory (creating the python_scripts folder at the root level if needed).
 
 ### Template Sensors and Configuration
 
@@ -66,7 +72,7 @@ The display makes use of multiple templated sensors and configuration in HA_epap
 
 1. First edit the HA_epaper.yaml file provided under HomeAssistant_sensor folder to customize for your setup
     - The weather service provider should be set to your desired provider. Change all occurrences of "weather.weather_ch" to your weather provider. The project assumes the weather provider provides daily weather forecast data via the weather-get_forecasts call.
-2. Edit the calendar entity IDs to your own. These are stored in the secrets.yaml file.
+2. Edit the calendar entity IDs to your own (usually in a "calendar.XXXX" format). These are stored in the secrets.yaml file.
 
     ```yaml
     entity_id:
@@ -84,7 +90,7 @@ The display makes use of multiple templated sensors and configuration in HA_epap
 
 Following the ESPHome guides I installed ESPHome on the driver board using the Windows command line/python version of ESPHome. I did not use the Home Assistant ESPHome device builder but you could.
 
-The project uses a secrets.yaml file which needs to be populated with the following secure credentials provided by your setup and the ESPHome initial base installation on the device Create a secrets.yaml file in the root folder of the project and populate it with the following (filling in the values for your setup):
+The project uses a secrets.yaml file which needs to be populated with the following secure credentials provided by your setup and the ESPHome initial base installation on the device. Create a secrets.yaml file in the root folder of the project and populate it with the following (filling in the values for your setup):
 
 ```
 wifi_ssid: 
