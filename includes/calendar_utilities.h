@@ -17,9 +17,10 @@ void get_calendar_matrix(int year, int month, char cal[7][7][3]) {
     }
     int day_of_week = (1 + (13 * (month + 1)) / 5 + year + year / 4 - year / 100 + year / 400) % 7;
     
-    // Adjust day of week to start from 0 for Sunday
-    //day_of_week = (day_of_week + 5) % 7;
-    day_of_week = (day_of_week + 6) % 7; // Adjust to start from 0 for Sunday
+    // Adjust day of week to start from Sunday or Monday
+    // Uncomment one of the following lines based on your preference:
+    //day_of_week = (day_of_week + 5) % 7;  // Adjust to start from Monday
+    day_of_week = (day_of_week + 6) % 7; // Adjust to start from Sunday
     
     // Fill in the weekdays
     char weekdays[7][3] = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};

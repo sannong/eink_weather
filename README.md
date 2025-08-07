@@ -86,13 +86,30 @@ The display makes use of multiple templated sensors and configuration in HA_epap
 4. After integrating restart HA
 5. You can verify proper operation by checking the "ESP Calendar Data" and "e-paper display data" sensor entities and see that they are populated with data.
 
+### Customizing Display Items
+
+#### Calendar Week Start
+
+By default the calendar display starts the week on Sunday (US style). This can be changed to start on Monday by editing the calendar_utilities.h file and commenting/uncommenting the preferred line:
+
+```c
+// Adjust day of week to start from Sunday or Monday
+// Uncomment one of the following lines based on your preference:
+//day_of_week = (day_of_week + 5) % 7;  // Adjust to start from Monday
+day_of_week = (day_of_week + 6) % 7; // Adjust to start from Sunday
+```
+
+#### Localization
+
+All names are currently in US English. This can be changed by searching through the code and changing all statically defined string names to a desired language.
+
 ## ESPHome Setup
 
 Following the ESPHome guides I installed ESPHome on the driver board using the Windows command line/python version of ESPHome. I did not use the Home Assistant ESPHome device builder but you could.
 
 The project uses a secrets.yaml file which needs to be populated with the following secure credentials provided by your setup and the ESPHome initial base installation on the device. Create a secrets.yaml file in the root folder of the project and populate it with the following (filling in the values for your setup):
 
-```
+```yaml
 wifi_ssid: 
 wifi_password:
 ota_password: 
