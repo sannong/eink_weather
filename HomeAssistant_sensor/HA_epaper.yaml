@@ -25,49 +25,32 @@ template:
   # Calendar        
   - trigger:
       - platform: time_pattern
-        hours: /1
-      - trigger: homeassistant
-        event: start
+        hours: "/1"
     action:
-        # Get the calendar data
-        - service: calendar.get_events
-          data:
-            duration:
-              # How many days into the future entries should be fetched
-              days: 7
-          target:
-            entity_id:
-              # Add your calendar entity id's here
-              - !secret calendar1
-              - !secret calendar2
-              - !secret calendar3
-          response_variable: calendar_response
-        # Convert the received data into our custom format that the ESPHome firmware expects via a python script
-        - service: python_script.esp_calendar_data_conversion
-          data:
-            calendar: "{{ calendar_response }}"
-            now: "{{ now().date() }}"
-          response_variable: calendar_converted
-    sensor:
-        - name: ESP Calendar Data
-          state: "OK"
-          attributes:
-            todays_day_name: >
-              {{ ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][now().weekday()] }}
-            todays_date_month: >
-              {% set months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] %}
-              {{ months[now().month-1] }}
-            closest_end_time: "{{ as_timestamp(calendar_converted.closest_end_time, default=0) }}"
-            entries: "{{ calendar_converted.entries }}"
-  - sensor:
-      - unique_id: e_paper_dagen_op_accu
-        name: E-paper op accu
-        unit_of_measurement: days
-        state: >
-          {% set event = as_timestamp(strptime('22-04-2023 18:00','%d-%m-%Y %H:%M')) %}
-          {% set delta = ((event - now().timestamp()) / 86400) | round (1) %}
-          {{ -delta }}
-        state_class: measurement
+      - service: calendar.get_events
+        target:
+          entity_id:
+            - !secret calendar1
+            - !secret calendar2
+            - !secret calendar3
+        data:
+          duration:
+            days: 7
+        response_variable: calendar_response
+      - service: pyscript.esp_calendar_convert
+        data:
+          calendar: "{{ calendar_response }}"
+          now: "{{ now().date() }}"
+          entity_id: sensor.esp_calendar_data
+    - sensor:
+        - unique_id: e_paper_dagen_op_accu
+          name: E-paper op accu
+          unit_of_measurement: days
+          state: >
+            {% set event = as_timestamp(strptime('22-04-2023 18:00','%d-%m-%Y %H:%M')) %}
+            {% set delta = ((event - now().timestamp()) / 86400) | round (1) %}
+            {{ -delta }}
+          state_class: measurement
   - trigger:
       - trigger: state
         entity_id: sensor.weather_forecast
