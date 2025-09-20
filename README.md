@@ -95,7 +95,6 @@ By default the calendar display starts the week on Sunday (US style). This can b
 
 ```c
     // Adjust day of week to start from Sunday or Monday
-    // Uncomment one of the following lines based on your preference:
     // start_sunday = 1 → week starts on Sunday
     // start_sunday = 0 → week starts on Monday
     int start_sunday = 0;

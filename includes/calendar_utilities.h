@@ -18,7 +18,6 @@ void get_calendar_matrix(int year, int month, char cal[7][7][3]) {
     int day_of_week = (1 + (13 * (month + 1)) / 5 + year + year / 4 - year / 100 + year / 400) % 7;
     
     // Adjust day of week to start from Sunday or Monday
-    // Uncomment one of the following lines based on your preference:
     // start_sunday = 1 → week starts on Sunday
     // start_sunday = 0 → week starts on Monday
     int start_sunday = 0;
