@@ -19,14 +19,29 @@ void get_calendar_matrix(int year, int month, char cal[7][7][3]) {
     
     // Adjust day of week to start from Sunday or Monday
     // Uncomment one of the following lines based on your preference:
-    //day_of_week = (day_of_week + 5) % 7;  // Adjust to start from Monday
-    day_of_week = (day_of_week + 6) % 7; // Adjust to start from Sunday
-    
-    // Fill in the weekdays
-    char weekdays[7][3] = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
-    for (int i = 0; i < 7; i++) {
-        strcpy(cal[0][i], weekdays[i]);
+    // start_sunday = 1 → week starts on Sunday
+    // start_sunday = 0 → week starts on Monday
+    int start_sunday = 0;
+
+    // Adjust day_of_week (0 = Sunday, 1 = Monday, ... 6 = Saturday)
+    if (start_sunday) {
+        day_of_week = (day_of_week + 6) % 7;  // Sunday as the first day
+    } else {
+        day_of_week = (day_of_week + 5) % 7;  // Monday as the first day
     }
+
+    // Base weekday list starting from Sunday
+    const char weekdays_all[7][3] = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
+
+    // Select the correct starting index (0 = Sunday, 1 = Monday)
+    int start_index = start_sunday ? 0 : 1;
+
+    // Rotate weekdays according to start_index
+    for (int i = 0; i < 7; i++) {
+        int idx = (start_index + i) % 7;
+        strcpy(cal[0][i], weekdays_all[idx]);
+    }
+
     
     // Fill in the days
     int current_day = 1 - day_of_week; // Adjust the starting day of the month
