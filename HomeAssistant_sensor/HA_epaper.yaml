@@ -24,25 +24,31 @@ template:
           forecast: "{{ daily['weather.weather_ch'].forecast }}"
   # Calendar        
   - trigger:
-      - platform: time_pattern
+      - trigger: time_pattern
         hours: "/1"
+      - trigger: homeassistant
+        event: start
     action:
-      - service: calendar.get_events
+      # Get the calendar data
+      - action: calendar.get_events
         target:
           entity_id:
+            # Add your calendar entity id's here
             - !secret calendar1
             - !secret calendar2
             - !secret calendar3
         data:
           duration:
+            # How many days into the future entries should be fetched
             days: 7
         response_variable: calendar_response
-      - service: pyscript.esp_calendar_convert
+      # Convert the received data into our custom format that the ESPHome firmware expects via a python script
+      - action: pyscript.esp_calendar_convert
         data:
           calendar: "{{ calendar_response }}"
           now: "{{ now().date() }}"
           entity_id: sensor.esp_calendar_data
-    - sensor:
+  - sensor:
         - unique_id: e_paper_dagen_op_accu
           name: E-paper op accu
           unit_of_measurement: days

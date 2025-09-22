@@ -64,7 +64,7 @@ This project uses the following integrations:
 
 ### Pyscript
 
-A python script is used to format the calendar event data. Copy the pyscripts folder and contents provided to your Home Assistant root directory (creating the pyscripts folder at the root level if needed).
+A python script is used to format the calendar event data. Copy the pyscript folder and contents provided to your Home Assistant root directory (creating the pyscript folder at the root level if needed).
 You need the [pyscript](https://github.com/custom-components/pyscript) integration from HACS.
 
 ### Template Sensors and Configuration
