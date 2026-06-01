@@ -76,9 +76,10 @@ Denmark Version:
 
 - NWS Alerts: Currently the display will only show the first alert for a given region configuration even if there are multiple alerts active. It displays the "Event" field of the alert so that it fits in the limited space on one line. This could be modified to show multiple alerts and/or more detail by modifying the HA_epaper.yaml weather_alert_now and weather_alert_number code.
 
-### Python Script
+### Pyscript
 
-A python script is used to format the calendar event data. Copy the python_scripts folder and contents provided to your Home Assistant root directory (creating the python_scripts folder at the root level if needed).
+A python script is used to format the calendar event data. Copy the pyscript folder and contents provided to your Home Assistant root directory (creating the pyscript folder at the root level if needed).
+You need the [pyscript](https://github.com/custom-components/pyscript) integration from HACS.
 
 ### Template Sensors and Configuration
 
@@ -107,10 +108,10 @@ The display makes use of multiple templated sensors and configuration in HA_epap
 By default the calendar display starts the week on Sunday (US style). This can be changed to start on Monday by editing the calendar_utilities.h file and commenting/uncommenting the preferred line:
 
 ```c
-// Adjust day of week to start from Sunday or Monday
-// Uncomment one of the following lines based on your preference:
-//day_of_week = (day_of_week + 5) % 7;  // Adjust to start from Monday
-day_of_week = (day_of_week + 6) % 7; // Adjust to start from Sunday
+    // Adjust day of week to start from Sunday or Monday
+    // start_sunday = 1 → week starts on Sunday
+    // start_sunday = 0 → week starts on Monday
+    int start_sunday = 0;
 ```
 
 #### Localization
