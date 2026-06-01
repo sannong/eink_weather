@@ -10,6 +10,12 @@ Front Of Frame
 
 Back Of Frame
 
+## Update - Danish/European Version
+
+I relocated to Denmark and have made a branch of this project which uses celsius/Met.no for the weather and Danish day/month names. I'm keeping this as an active branch rather than merging it to the mainline. 
+
+Note: I don't yet have weather alerts working for the Danish branch (I plan to use MeteoAlarm). Thus the alerts functionality is currently commented out in this branch.
+
 ## Project References
 
 The following existing projects/reddit posts were used as reference, source code starting point, and inspiration for this work and are given credit here:
@@ -51,12 +57,20 @@ This project uses the following integrations:
 
 - [Sun](https://www.home-assistant.io/integrations/sun)
 - [Moon](https://www.home-assistant.io/integrations/moon)
+- [Google Calendar](https://www.home-assistant.io/integrations/google)
+- [ESPHome](https://www.home-assistant.io/integrations/esphome)
+
+US Version:
+
 - [The Weather Channel (HACS)](https://github.com/jaydeethree/Home-Assistant-weatherdotcom)
   - You can substitute in whatever weather service you like but this is the configured service in the code as is
 - [NWS Alerts (HACS)](https://github.com/finity69x2/nws_alerts)
   - This only works for USA based weather alerts, some other alert provider could be substituted in other locations
-- [Google Calendar](https://www.home-assistant.io/integrations/google)
-- [ESPHome](https://www.home-assistant.io/integrations/esphome)
+
+Denmark Version:
+
+- [Met.no](https://www.home-assistant.io/integrations/met/)
+- [MeteoAlarm](https://www.home-assistant.io/integrations/meteoalarm/)
 
 #### Integration Notes
 
@@ -101,7 +115,11 @@ day_of_week = (day_of_week + 6) % 7; // Adjust to start from Sunday
 
 #### Localization
 
-All names are currently in US English. This can be changed by searching through the code and changing all statically defined string names to a desired language.
+US Version: All names are currently in US English and units are US Standard.
+
+Denmark Version: Month/day names changed to Danish and units are Metric.
+
+There's not a convenient way to change the language yes besides just searching through the code and changing all the names manually.
 
 ## ESPHome Setup
 
